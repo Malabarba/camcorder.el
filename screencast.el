@@ -30,6 +30,7 @@
 
 (require 'names)
 
+;;;###autoload
 (define-namespace screencast-
 :package screencast
 :version "0.1"
@@ -106,11 +107,9 @@ Used by `screencast-start-recording-recording' to decide on the dimensions.")
 ;;; User Functions
 (defun stop () "Stop recording." (interactive) (mode -1))
 
+:autoload
 (defun record ()
   "Open a new Emacs frame and start recording.
-Recording will only start after hitting SPC.
-With prefix argument NO-WAIT, start immediately instead.
-
 You can customize the size and properties of this frame with
 `screencast-frame-parameters'."
   (interactive)
@@ -121,8 +120,10 @@ You can customize the size and properties of this frame with
            (make-frame frame-parameters))))
   (mode))
 
+:autoload
 (defalias 'screencast-start #'record)
 
+:autoload
 (define-minor-mode mode nil nil "sc"
   '(([f12] . screencast-stop)
     ([f11] . screencast-pause))
