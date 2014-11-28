@@ -3,11 +3,14 @@
 Tool for capturing screencasts directly from Emacs.
 
 - To use it, simply call =M-x screencast-record=.
-- When you're finished, hit =F12=.
+- A new smaller frame will popup and recording starts.
+- When you're finished, hit =F12= and wait for the conversion to finish.
 
 Screencasts can be generated in any format understood by
 =imagemagick='s =convert= command. 
 You can even pause the recording with =F11=!
+
+If you want to record without a popup frame, use =M-x screencast-mode=.
 
 ** Dependencies
 
