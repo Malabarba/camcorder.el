@@ -1,3 +1,5 @@
+#+OPTIONS: toc:nil num:nil
+
 * screencast.el
 
 Tool for capturing screencasts directly from Emacs.
@@ -25,11 +27,17 @@ else, you should still be able to configure =screencast.el= work.
 - mplayer
 - imagemagick
 
+Do you know of a way to make it work with less dependencies? *Open an issue and let me know!*
+
 ** Troubleshooting
 
-On my machine, I noticed that the window-id Emacs reported (evaluate
-=(format "%x" (string-to-number (frame-parameter (selected-frame)
-'window-id)))=) differed from the id that the WM reported (use the
-=wminfo= utility). I added the variable =screencast-window-id-offset=
-to correct that. The default value is -4, but you might need to
-increase or decrease that to make those two numbers match.
+On my machine, I noticed that the window-id Emacs reported 
+#+BEGIN_SRC emacs-lisp
+(format "%x"
+  (string-to-number
+   (frame-parameter (selected-frame) 'window-id)))
+#+END_SRC
+differed from the id that the WM reported with the =wminfo= utility. I
+added the variable =screencast-window-id-offset= to correct that. The
+default value is -4, but you might need to increase or decrease that
+to make those two numbers match.
