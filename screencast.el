@@ -39,7 +39,7 @@
 ;;; Variables
 (defcustom frame-parameters
   '((name . "screencast.el Recording - F12 to Stop - F11 to Pause/Resume")
-    (height . 15)
+    (height . 30)
     (width . 80)
     (top .  80))
   "Parameters used on the recording frame.
