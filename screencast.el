@@ -6,7 +6,7 @@
 ;; URL: http://github.com/Bruce-Connor/screencast.el
 ;; Keywords: multimedia
 ;; Version: 0.1
-;; Package-Requires: ((names "20141119"))
+;; Package-Requires: ((names "20141119") (cl-lib "0.5"))
 ;; Keywords: lisp tools
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -75,6 +75,7 @@
 ;;; Code:
 
 (require 'names)
+(require 'cl-lib)
 
 ;;;###autoload
 (define-namespace screencast-
@@ -229,11 +230,11 @@ Used internally. You should call `screencast-record' or
            (list (lambda (x y) t))))
       (funcall #'shell-command
         (format "(%s) &"
-                (mapconcat #'identity
-                           (mapcar
-                            #'-convert-args
-                            recording-command)
-                           ""))
+          (mapconcat #'identity
+                     (mapcar
+                      #'-convert-args
+                      recording-command)
+                     ""))
         "*screencast output*"))
     (while (null -process)
       (sleep-for 0.1)
@@ -263,10 +264,10 @@ Used on `screencast-recording-command'."
   "Return FRAME's window-id in hex.
 Increments the actual value by `window-id-offset'."
   (format
-   "0x%x"
-   (+ (string-to-number
-       (frame-parameter frame 'window-id))
-      window-id-offset)))
+      "0x%x"
+    (+ (string-to-number
+        (frame-parameter frame 'window-id))
+       window-id-offset)))
 
 )
 
