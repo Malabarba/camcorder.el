@@ -1,0 +1,23 @@
+* screencast.el
+
+Tool for capturing screencasts directly from Emacs.
+
+- To use it, simply call =M-x screencast-record=.
+- When you're finished, hit =F12=.
+
+Screencasts can be generated in any format understood by
+=imagemagick='s =convert= command. 
+You can even pause the recording with =F11=!
+
+** Dependencies
+
+=screencast.el= uses the [[https://github.com/Bruce-Connor/names/][*Names*]] package, so if you're installing
+manually you need to install that too.
+
+For the recording, =screencast.el= uses the following linux utilities.
+If you have these, it should work out of the box. If you use something
+else, you should still be able to configure =screencast.el= work.
+
+- recordmydesktop
+- mplayer
+- imagemagick
