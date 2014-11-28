@@ -16,7 +16,7 @@ If you want to record without a popup frame, use =M-x screencast-mode=.
 
 ** Dependencies
 
-=screencast.el= uses the [[https://github.com/Bruce-Connor/names/][*Names*]] package, so if you're installing
+=screencast.el= uses the *[[https://github.com/Bruce-Connor/names/][Names]]* package, so if you're installing
 manually you need to install that too.
 
 For the recording, =screencast.el= uses the following linux utilities.
