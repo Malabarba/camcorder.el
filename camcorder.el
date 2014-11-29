@@ -1,9 +1,9 @@
-;;; screencast.el --- Record screencasts in gif or other formats.  -*- lexical-binding: t; -*-
+;;; camcorder.el --- Record screencasts in gif or other formats.  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014 Artur Malabarba <bruce.connor.am@gmail.com>
 
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
-;; URL: http://github.com/Bruce-Connor/screencast.el
+;; URL: http://github.com/Bruce-Connor/camcorder.el
 ;; Keywords: multimedia
 ;; Version: 0.1
 ;; Package-Requires: ((names "20141119") (cl-lib "0.5"))
@@ -26,7 +26,7 @@
 ;;
 ;;   Tool for capturing screencasts directly from Emacs.
 ;;
-;;   • To use it, simply call `M-x screencast-record'.
+;;   • To use it, simply call `M-x camcorder-record'.
 ;;   • A new smaller frame will popup and recording starts.
 ;;   • When you're finished, hit `F12' and wait for the conversion to
 ;;     finish.
@@ -36,17 +36,17 @@
 ;;   with `F11'!
 ;;
 ;;   If you want to record without a popup frame, use `M-x
-;;   screencast-mode'.
+;;   camcorder-mode'.
 ;;
 ;; Dependencies
 ;; ────────────
 ;;
-;;   `screencast.el' uses the [*Names*] package, so if you're installing
+;;   `camcorder.el' uses the [*Names*] package, so if you're installing
 ;;   manually you need to install that too.
 ;;
-;;   For the recording, `screencast.el' uses the following linux utilities.
+;;   For the recording, `camcorder.el' uses the following linux utilities.
 ;;   If you have these, it should work out of the box. If you use something
-;;   else, you should still be able to configure `screencast.el' work.
+;;   else, you should still be able to configure `camcorder.el' work.
 ;;
 ;;   • recordmydesktop
 ;;   • mplayer
@@ -68,7 +68,7 @@
 ;;   │    (frame-parameter (selected-frame) 'window-id)))
 ;;   └────
 ;;   differed from the id that the WM reported with the `wminfo' utility. I
-;;   added the variable `screencast-window-id-offset' to correct that. The
+;;   added the variable `camcorder-window-id-offset' to correct that. The
 ;;   default value is -4, but you might need to increase or decrease that
 ;;   to make those two numbers match.
 
@@ -78,15 +78,15 @@
 (require 'cl-lib)
 
 ;;;###autoload
-(define-namespace screencast-
-:package screencast
+(define-namespace camcorder-
+:package camcorder
 :version "0.1"
 :group emacs
 
 
 ;;; Variables
 (defcustom frame-parameters
-  '((name . "screencast.el Recording - F12 to Stop - F11 to Pause/Resume")
+  '((name . "camcorder.el Recording - F12 to Stop - F11 to Pause/Resume")
     (height . 30)
     (width . 80)
     (top .  80))
@@ -143,7 +143,7 @@ Meaning of symbols:
 
 (defvar recording-frame nil
   "Frame created for recording.
-Used by `screencast-start-recording-recording' to decide on the dimensions.")
+Used by `camcorder--start-recording' to decide on the dimensions.")
 
 (defvar -process nil "Recording process PID.")
 
@@ -158,7 +158,7 @@ Used by `screencast-start-recording-recording' to decide on the dimensions.")
 (defun record ()
   "Open a new Emacs frame and start recording.
 You can customize the size and properties of this frame with
-`screencast-frame-parameters'."
+`camcorder-frame-parameters'."
   (interactive)
   (select-frame
    (if (frame-live-p recording-frame)
@@ -168,12 +168,12 @@ You can customize the size and properties of this frame with
   (mode))
 
 :autoload
-(defalias 'screencast-start #'record)
+(defalias 'camcorder-start #'record)
 
 :autoload
 (define-minor-mode mode nil nil "sc"
-  '(([f12] . screencast-stop)
-    ([f11] . screencast-pause))
+  '(([f12] . camcorder-stop)
+    ([f11] . camcorder-pause))
   :global t
   (if mode
       (progn
@@ -197,7 +197,7 @@ You can customize the size and properties of this frame with
     (when (frame-live-p recording-frame)
       (delete-frame recording-frame))
     (setq recording-frame nil)
-    (pop-to-buffer "*screencast output*")))
+    (pop-to-buffer "*camcorder output*")))
 
 (defun -is-running-p ()
   "Non-nil if the recording process is running."
@@ -213,15 +213,15 @@ You can customize the size and properties of this frame with
 
 ;;; Internal
 (defun -stop-recording-if-frame-deleted (frame)
-  "Stop recording if FRAME matches `screencast-recording-frame'.
+  "Stop recording if FRAME matches `camcorder-recording-frame'.
 Meant for use in `delete-frame-functions'."
-  (when (equal frame screencast-recording-frame)
+  (when (equal frame camcorder-recording-frame)
     (stop)))
 
 (defun -start-recording ()
   "Start recording process.
-Used internally. You should call `screencast-record' or
-`screencast-mode' instead."
+Used internally. You should call `camcorder-record' or
+`camcorder-mode' instead."
   (message "Recording started.")
   (if (-is-running-p)
       (error "Recording process already running %s" -process)
@@ -235,7 +235,7 @@ Used internally. You should call `screencast-record' or
                       #'-convert-args
                       recording-command)
                      ""))
-        "*screencast output*"))
+        "*camcorder output*"))
     (while (null -process)
       (sleep-for 0.1)
       (let* ((name (car recording-command))
@@ -248,16 +248,16 @@ Used internally. You should call `screencast-record' or
 
 (defun -convert-args (arg)
   "Convert recorder argument ARG into values.
-Used on `screencast-recording-command'."
+Used on `camcorder-recording-command'."
   (cond
    ((stringp arg) arg)
    ((eq arg 'file) -output-file-name)
    ((eq arg 'window-id)
     (-frame-window-id recording-frame))
    ((eq arg 'temp-dir)
-    (expand-file-name "screencast/" temp-dir))
+    (expand-file-name "camcorder/" temp-dir))
    ((eq arg 'temp-file)
-    (expand-file-name "screencast.ogv" temp-dir))
+    (expand-file-name "camcorder.ogv" temp-dir))
    (t (error "Don't know this argument: %s" arg))))
 
 (defun -frame-window-id (frame)
@@ -271,5 +271,5 @@ Increments the actual value by `window-id-offset'."
 
 )
 
-(provide 'screencast)
-;;; screencast.el ends here
+(provide 'camcorder)
+;;; camcorder.el ends here
