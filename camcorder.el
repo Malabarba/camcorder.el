@@ -93,12 +93,11 @@ See `make-frame'."
   :type '(alist :key-type symbol :value-type sexp))
 
 (defcustom recording-command
-  '("recordmydesktop"
-    " --fps 10" " --no-sound"
-    " --windowid " window-id
-    " -o " temp-file
-    " && mplayer -ao null " temp-file
-    " -vo png:z=1:outdir=" temp-dir
+  '("recordmydesktop" " --fps 20" " --no-sound"
+    " --windowid " window-id " -o " temp-file
+    " && mkdir -p " temp-dir
+    " && cd " temp-dir
+    " && mplayer -ao null " temp-file " -vo png:z=9"
     " && convert " temp-dir "* " file
     "; rm -r " temp-file " " temp-dir)
   "Command used to start the recording.
