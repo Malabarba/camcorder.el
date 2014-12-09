@@ -85,8 +85,8 @@
 ;;; Variables
 (defcustom frame-parameters
   '((name . "camcorder.el Recording - F12 to Stop - F11 to Pause/Resume")
-    (height . 30)
-    (width . 80)
+    (height . 20)
+    (width . 65)
     (top .  80))
   "Parameters used on the recording frame.
 See `make-frame'."
