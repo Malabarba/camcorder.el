@@ -225,11 +225,10 @@ Used internally. You should call `camcorder-record' or
            (list (lambda (x y) t))))
       (funcall #'shell-command
         (format "(%s) &"
-          (mapconcat #'identity
-                     (mapcar
-                      #'-convert-args
-                      recording-command)
-                     ""))
+          (mapconcat
+           #'-convert-args
+           recording-command
+           ""))
         "*camcorder output*"))
     (while (null -process)
       (sleep-for 0.1)
