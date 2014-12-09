@@ -174,8 +174,6 @@ You can customize the size and properties of this frame with
   :global t
   (if mode
       (progn
-        (unless recording-frame
-          (setq recording-frame (selected-frame)))
         (let ((-output-file-name
                (expand-file-name
                 (read-file-name
@@ -250,7 +248,10 @@ Used on `camcorder-recording-command'."
    ((stringp arg) arg)
    ((eq arg 'file) -output-file-name)
    ((eq arg 'window-id)
-    (-frame-window-id recording-frame))
+    (-frame-window-id
+     (if (frame-live-p recording-frame)
+         recording-frame
+       (selected-frame))))
    ((eq arg 'temp-dir)
     (expand-file-name "camcorder/" temp-dir))
    ((eq arg 'temp-file)
