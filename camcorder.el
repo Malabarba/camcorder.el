@@ -121,7 +121,7 @@ Meaning of symbols:
            (const :tag "window-id parameter of the recording frame" window-id)
            (const :tag "Output file" file)
            (const :tag "Temporary intermediate file" temp-file)
-           (const :tag "Temporary intermediate dir" temp-file))))
+           (const :tag "Temporary intermediate dir" temp-dir))))
 
 (defcustom window-id-offset -4
   "Difference between Emacs' and X's window-id."
