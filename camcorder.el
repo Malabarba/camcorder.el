@@ -6,7 +6,7 @@
 ;; URL: http://github.com/Bruce-Connor/camcorder.el
 ;; Keywords: multimedia screencast
 ;; Version: 0.1
-;; Package-Requires: ((emacs "24") (names "20141119") (cl-lib "0.5"))
+;; Package-Requires: ((emacs "24") (names "20150000") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
