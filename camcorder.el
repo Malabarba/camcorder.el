@@ -93,40 +93,80 @@ See `make-frame'."
   :type '(alist :key-type symbol :value-type sexp))
 
 (defcustom recording-command
-  '("recordmydesktop" " --fps 20" " --no-sound"
-    " --windowid " window-id " -o " temp-file
-    " && mkdir -p " temp-dir
-    " && cd " temp-dir
-    " && mplayer -ao null " temp-file " -vo png:z=9"
-    " && convert " temp-dir "* " file
-    "; rm -r " temp-file " " temp-dir)
+  '("recordmydesktop" " --fps 20 --no-sound --windowid " window-id " -o " file)
   "Command used to start the recording.
-This is a list where all elements are concated together (with no
+This is a list where all elements are `concat'ed together (with no
 separators) and passed to `shell-command'. Each element must be a
 string or a symbol. The first string should be just the name of a
-command (no args), so that we can SIGTERM it.
+command (no args), so that we can identify it and SIGTERM it.
 
-To increase compression at the cost of slower conversion, change
-\"z=1\" to \"z=9\" (or something in between). Other options you
-may want to configure are \"--fps 10\" and \"--no-sound\".
+Options you may want to configure are \"--fps 10\" and \"--no-sound\".
 
 Meaning of symbols:
    'file is the output file.
    'window-id is the window-id parameter of the recording frame.
-   'temp-file and 'temp-dir are self-explanatory."
-  :type '(repeat
-          (choice
-           string
-           (const :tag "window-id parameter of the recording frame" window-id)
-           (const :tag "Output file" file)
-           (const :tag "Temporary intermediate file" temp-file)
-           (const :tag "Temporary intermediate dir" temp-dir))))
+   'temp-file and 'temp-dir are auto-generated file names in the
+   temp directory."
+  :type '(cons string
+               (repeat
+                (choice
+                 string
+                 (const :tag "window-id parameter of the recording frame" window-id)
+                 (const :tag "Output file" file)
+                 (const :tag "Temporary intermediate file" temp-file)
+                 (const :tag "Temporary intermediate dir" temp-dir)))))
+
+(defcustom gif-conversion-commands
+  '(("mplayer + imagemagick"
+     "mkdir -p " temp-dir
+     " && cd " temp-dir
+     " && mplayer -ao null " input-file " -vo jpeg"
+     " && convert " temp-dir "* " gif-file
+     "; rm -r " temp-dir)
+    ("mplayer + imagemagick + optimize"
+     "mkdir -p " temp-dir
+     " && cd " temp-dir
+     " && mplayer -ao null " input-file " -vo jpeg"
+     " && convert " temp-dir "* " temp-gif-file
+     " && convert " temp-gif-file " -fuzz 10% -layers Optimize " gif-file
+     "; rm -r " temp-dir temp-gif-file))
+  "Alist of commands used to convert ogv file to a gif.
+This is a list where each element has the form
+    (DESCRIPTOR STRING-OR-SYMBOL STRING-OR-SYMBOL ...)
+
+DESCRIPTOR is a human-readable string, describing the ogvcommand.
+STRING-OR-SYMBOL's are all concated together (with no separators)
+and passed to `shell-command'. Strings are used literally, and
+symbols are converted according to the following meanings:
+
+   'file is the output file.
+   'window-id is the window-id parameter of the recording frame.
+   'temp-file, 'temp-dir, and 'temp-gif-file are auto-generated
+       file names in the temp directory.
+
+To increase compression at the cost of slower conversion, change
+\"z=1\" to \"z=9\" (or something in between).  You may also use
+completely different conversion commands, if you know any."
+  :type '(alist :key-type (string :tag "Description for this command")
+                :value-type (repeat
+                             (choice
+                              string
+                              (const :tag "window-id parameter of the recording frame" window-id)
+                              (const :tag "Output gif file" gif-file)
+                              (const :tag "Input file" input-file)
+                              (const :tag "Temporary intermediate gif file" temp-gif-file)
+                              (const :tag "Temporary intermediate file" temp-file)
+                              (const :tag "Temporary intermediate dir" temp-dir)))))
 
 (defcustom window-id-offset -4
   "Difference between Emacs' and X's window-id."
   :type 'integer)
 
 (defcustom output-directory (expand-file-name "~/Videos")
+  "Directory where screencasts are saved."
+  :type 'directory)
+
+(defcustom gif-output-directory output-directory
   "Directory where screencasts are saved."
   :type 'directory)
 
@@ -145,7 +185,10 @@ Used by `camcorder--start-recording' to decide on the dimensions.")
 (defvar -process nil "Recording process PID.")
 
 (defvar -output-file-name nil
-  "Temporarily bound to the filename chosen by the user.")
+  "Bound to the filename chosen by the user.")
+
+(defvar -gif-file-name nil
+  "Gif output file.")
 
 
 ;;; User Functions
@@ -168,24 +211,22 @@ You can customize the size and properties of this frame with
 (defalias 'camcorder-start #'record)
 
 :autoload
-(define-minor-mode mode nil nil "sc"
+(define-minor-mode mode
+  nil nil "sc"
   '(([f12] . camcorder-stop)
     ([f11] . camcorder-pause))
   :global t
   (if mode
       (progn
-        (let ((-output-file-name
-               (expand-file-name
-                (read-file-name
-                 "Output file (out.gif): "
-                 (file-name-as-directory output-directory)
-                 "out.gif")
-                output-directory)))
-          (-start-recording))
-        (add-hook 'delete-frame-functions
-          #'-stop-recording-if-frame-deleted))
-    (remove-hook 'delete-frame-functions
-      #'-stop-recording-if-frame-deleted)
+        (setq -output-file-name
+              (expand-file-name
+               (read-file-name "Output file (out.ogv): "
+                               (file-name-as-directory output-directory)
+                               "out.ogv")
+               output-directory))
+        (-start-recording)
+        (add-hook 'delete-frame-functions #'-stop-recording-if-frame-deleted))
+    (remove-hook 'delete-frame-functions #'-stop-recording-if-frame-deleted)
     (when (-is-running-p)
       (signal-process -process 'SIGTERM))
     (setq -process nil)
@@ -205,6 +246,37 @@ You can customize the size and properties of this frame with
   (when (-is-running-p)
     (signal-process -process 'SIGUSR1)))
 
+(defvar -input-file nil "")
+
+(defun convert-to-gif ()
+  "Convert the ogv file to gif."
+  (interactive)
+  (let* ((-input-file
+          (expand-file-name
+           (read-file-name "File to convert: "
+                           (or (file-name-directory (or -output-file-name ""))
+                               output-directory)
+                           nil t
+                           (file-name-nondirectory (or -output-file-name "")))))
+         (-file-base (file-name-base (file-name-nondirectory -input-file)))
+         (-gif-file-name
+          (expand-file-name
+           (read-file-name "Output gif: "
+                           gif-output-directory nil nil
+                           (concat -file-base ".gif"))
+           output-directory))
+         (command
+          (cdr (assoc
+                (completing-read "Command to use (TAB to see options): "
+                                 (mapcar #'car gif-conversion-commands)
+                                 nil t)
+                gif-conversion-commands))))
+    (setq command (mapconcat #'-convert-args command ""))
+    (when (y-or-n-p (format "Execute the following command? %s" command))
+      (shell-command (format "(%s) &" command)
+                     "*camcorder output*")
+      (pop-to-buffer "*camcorder output*"))))
+
 
 ;;; Internal
 (defun -stop-recording-if-frame-deleted (frame)
@@ -223,13 +295,10 @@ Used internally. You should call `camcorder-record' or
     (setq -process nil)
     (let ((display-buffer-overriding-action
            (list (lambda (x y) t))))
-      (funcall #'shell-command
-        (format "(%s) &"
-          (mapconcat
-           #'-convert-args
-           recording-command
-           ""))
-        "*camcorder output*"))
+      (shell-command
+       (format "(%s) &"
+         (mapconcat #'-convert-args recording-command ""))
+       "*camcorder output*"))
     (while (null -process)
       (sleep-for 0.1)
       (let* ((name (car recording-command))
@@ -246,6 +315,8 @@ Used on `camcorder-recording-command'."
   (cond
    ((stringp arg) arg)
    ((eq arg 'file) -output-file-name)
+   ((eq arg 'input-file) -input-file)
+   ((eq arg 'gif-file)   -gif-file-name)
    ((eq arg 'window-id)
     (-frame-window-id
      (if (frame-live-p recording-frame)
@@ -255,13 +326,14 @@ Used on `camcorder-recording-command'."
     (expand-file-name "camcorder/" temp-dir))
    ((eq arg 'temp-file)
     (expand-file-name "camcorder.ogv" temp-dir))
+   ((eq arg 'temp-gif-file)
+    (expand-file-name "camcorder.gif" temp-dir))
    (t (error "Don't know this argument: %s" arg))))
 
 (defun -frame-window-id (frame)
   "Return FRAME's window-id in hex.
 Increments the actual value by `window-id-offset'."
-  (format
-      "0x%x"
+  (format "0x%x"
     (+ (string-to-number
         (frame-parameter frame 'window-id))
        window-id-offset)))
