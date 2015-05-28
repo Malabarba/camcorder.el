@@ -1,16 +1,17 @@
 #+OPTIONS: toc:nil num:nil
+#+STARTUP: content
 
 * camcorder.el
 
 Tool for capturing screencasts directly from Emacs.
 
-- To use it, simply call =M-x camcorder-record=.
-- A new smaller frame will popup and recording starts.
-- When you're finished, hit =F12= and wait for the conversion to finish.
+1. To use it, simply call =M-x camcorder-record=.
+2. A new smaller frame will popup and recording starts.
+3. When you're finished, hit =F12=.
 
-Screencasts can be generated in any format understood by
-=imagemagick='s =convert= command. 
-You can even pause the recording with =F11=!
+View screencasts are generated in *ogv* format, and you can even pause
+the recording with =F11=! You can also convert the ~.ogv~ file to a
+*gif* by issuing the command =M-x camcorder-convert-to-gif=.
 
 If you want to record without a popup frame, use =M-x camcorder-mode=.
 
@@ -19,15 +20,19 @@ If you want to record without a popup frame, use =M-x camcorder-mode=.
 =camcorder.el= uses the *[[https://github.com/Bruce-Connor/names/][Names]]* and the =cl-lib= packages, so if you're installing
 manually you need to install those too.
 
-For the recording, =camcorder.el= uses the following linux utilities.
+For the recording, =camcorder.el= uses the following linux utility:
+
+- recordmydesktop.
+
+For the conversion to gif, you will either one of the following two options:
+
+- ffmpeg, or
+- mplayer and imagemagick.
+
 If you have these, it should work out of the box. If you use something
-else, you should still be able to configure =camcorder.el= work.
-
-- recordmydesktop
-- mplayer
-- imagemagick
-
-Do you know of a way to make it work with less dependencies? *Open an issue and let me know!*
+else, you should still be able to get =camcorder.el= work by
+configuring ~camcorder-recording-command~ and
+~camcorder-gif-conversion-commands~.
 
 ** Troubleshooting
 
