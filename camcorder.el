@@ -117,13 +117,15 @@ Meaning of symbols:
                  (const :tag "Temporary intermediate dir" temp-dir)))))
 
 (defcustom gif-conversion-commands
-  '(("mplayer + imagemagick"
+  '(("ffmpeg"
+     "ffmpeg -i " input-file " -pix_fmt rgb24 -r 30 " gif-file)
+    ("mplayer + imagemagick"
      "mkdir -p " temp-dir
      " && cd " temp-dir
      " && mplayer -ao null " input-file " -vo jpeg"
      " && convert " temp-dir "* " gif-file
      "; rm -r " temp-dir)
-    ("mplayer + imagemagick + optimize"
+    ("mplayer + imagemagick + optimize (slow)"
      "mkdir -p " temp-dir
      " && cd " temp-dir
      " && mplayer -ao null " input-file " -vo jpeg"
@@ -233,7 +235,9 @@ You can customize the size and properties of this frame with
     (when (frame-live-p recording-frame)
       (delete-frame recording-frame))
     (setq recording-frame nil)
-    (pop-to-buffer "*camcorder output*")))
+    (pop-to-buffer "*camcorder output*")
+    (message "OGV file saved. Use `M-x %s' to convert it to a gif."
+      #'convert-to-gif)))
 
 (defun -is-running-p ()
   "Non-nil if the recording process is running."
