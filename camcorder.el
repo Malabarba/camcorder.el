@@ -289,14 +289,24 @@ Meant for use in `delete-frame-functions'."
   (when (equal frame camcorder-recording-frame)
     (stop)))
 
+(defun -announce-start-recording ()
+  "Countdown from 3."
+  (message "Will start recording in 3..")
+  (sleep-for 0.7)
+  (message "Will start recording in .2.")
+  (sleep-for 0.7)
+  (message "Will start recording in ..1")
+  (sleep-for 0.7)
+  (message nil))
+
 (defun -start-recording ()
   "Start recording process.
 Used internally. You should call `camcorder-record' or
 `camcorder-mode' instead."
-  (message "Recording started.")
   (if (-is-running-p)
       (error "Recording process already running %s" -process)
     (setq -process nil)
+    (-announce-start-recording)
     (let ((display-buffer-overriding-action
            (list (lambda (x y) t))))
       (shell-command
