@@ -237,7 +237,7 @@ You can customize the size and properties of this frame with
     (setq recording-frame nil)
     (pop-to-buffer "*camcorder output*")
     (message "OGV file saved. Use `M-x %s' to convert it to a gif."
-      #'convert-to-gif)))
+             #'convert-to-gif)))
 
 (defun -is-running-p ()
   "Non-nil if the recording process is running."
@@ -308,10 +308,10 @@ Used internally. You should call `camcorder-record' or
     (setq -process nil)
     (-announce-start-recording)
     (let ((display-buffer-overriding-action
-           (list (lambda (x y) t))))
+           (list (lambda (_x _y) t))))
       (shell-command
        (format "(%s) &"
-         (mapconcat #'-convert-args recording-command ""))
+               (mapconcat #'-convert-args recording-command ""))
        "*camcorder output*"))
     (while (null -process)
       (sleep-for 0.1)
@@ -348,9 +348,9 @@ Used on `camcorder-recording-command'."
   "Return FRAME's window-id in hex.
 Increments the actual value by `window-id-offset'."
   (format "0x%x"
-    (+ (string-to-number
-        (frame-parameter frame 'window-id))
-       window-id-offset)))
+          (+ (string-to-number
+              (frame-parameter frame 'window-id))
+             window-id-offset)))
 
 )
 
