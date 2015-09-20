@@ -5,7 +5,7 @@
 ;; Author: Artur Malabarba <bruce.connor.am@gmail.com>
 ;; URL: http://github.com/Bruce-Connor/camcorder.el
 ;; Keywords: multimedia screencast
-;; Version: 0.1
+;; Version: 0.2
 ;; Package-Requires: ((emacs "24") (names "20150000") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
