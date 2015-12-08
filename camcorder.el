@@ -239,6 +239,11 @@ You can customize the size and properties of this frame with
     (message "OGV file saved. Use `M-x %s' to convert it to a gif."
              #'convert-to-gif)))
 
+(defun -clear-message ()
+  (message " "))
+
+(add-hook 'camcorder-mode-hook #'-clear-message)
+
 (defun -is-running-p ()
   "Non-nil if the recording process is running."
   (and (integerp -process)
