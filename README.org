@@ -39,3 +39,11 @@ configuring ~camcorder-recording-command~ and
 If camcorder.el seems to pick an incorrect window id (differing from the
 one that =wminfo= returns), you can change =camcorder-window-id-offset= from its
 default value of 0.
+
+If you the recording ends and the emacs window seems to have frozen try pressing C-g, 
+this maybe caused by your shell if your using fish for example.
+You can use the below to make emacs use bash which should fix this issue.
+
+#+BEGIN_SRC emacs-lisp
+   (setq shell-file-name "/bin/bash")
+#+END_SRC
