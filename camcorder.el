@@ -111,6 +111,9 @@ Meaning of symbols:
 
 (defcustom gif-conversion-commands
   '(("ffmpeg"
+     "ffmpeg -i " input-file " -vf palettegen input.palette.png"
+     " && ffmpeg -i " input-file " -i input.palette.png -filter_complex paletteuse " gif-file)
+    ("ffmpeg (small size, but with artifacts)"
      "ffmpeg -i " input-file " -pix_fmt rgb24 -r 30 " gif-file)
     ("mplayer + imagemagick"
      "mkdir -p " temp-dir
